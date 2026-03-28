@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotto Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="number"] {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1em;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        .btn-play:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-play:active:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .btn-simulate {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-simulate:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-stop {
+            background: #ff6b6b;
+            color: white;
+            display: none;
+        }
+
+        .btn-stop.show {
+            display: block;
+        }
+
+        .btn-stop:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .config-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .config-section label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .config-section input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result.winning {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: #0a5d0a;
+            border: 2px solid #4caf50;
+            animation: bounce 0.6s ease;
+        }
+
+        .result.losing {
+            background: linear-gradient(135deg, #fa8072 0%, #ff6b6b 100%);
+            color: white;
+            border: 2px solid #ff4444;
+            animation: shake 0.5s ease;
+        }
+
+        .result.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 2px solid #ef5350;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            25% {
+                transform: translateY(-10px);
+            }
+            50% {
+                transform: translateY(0);
+            }
+            75% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-5px);
+            }
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .result h2 {
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .numbers-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .number {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.2em;
+            animation: popIn 0.5s ease;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .prize-text {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 15px;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .simulation-info {
+            font-size: 0.9em;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .history {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .history h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .history-item {
+            background: #f5f5f5;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            border-left: 4px solid #667eea;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .input-group {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .config-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: currentColor;
+            border-radius: 50%;
+            animation: loading 1.4s infinite;
+        }
+
+        @keyframes loading {
+            0%, 80%, 100% {
+                opacity: 0.5;
+            }
+            40% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎰 Lotto Simulator</h1>
+
+        <div class="form-section">
+            <form method="POST" id="playForm">
+                <div class="input-group">
+                    <input type="number" name="num1" min="1" max="50" required placeholder="1">
+                    <input type="number" name="num2" min="1" max="50" required placeholder="2">
+                    <input type="number" name="num3" min="1" max="50" required placeholder="3">
+                    <input type="number" name="num4" min="1" max="50" required placeholder="4">
+                    <input type="number" name="num5" min="1" max="50" required placeholder="5">
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn-play">Play Single Draw</button>
+                    <button type="button" class="btn-simulate" id="simulateBtn" onclick="startSimulation()">Run Simulation</button>
+                    <button type="button" class="btn-stop" id="stopBtn" onclick="stopSimulation()">Stop Simulation</button>
+                </div>
+            </form>
+
+            <div class="config-section">
+                <label for="maxAttempts">Max Attempts:</label>
+                <input type="number" id="maxAttempts" value="1000" min="1" max="10000">
+            </div>
+        </div>
+
+        <div id="resultContainer"></div>
+
+        {% if history %}
+            <div class="history">
+                <h3>📊 Game History</h3>
+                {% for game in history[-5:] %}
+                    <div class="history-item">
+                        Your: {{ game.user_numbers }} | Draw: {{ game.draw_numbers }} | Matches: {{ game.matches }} | Prize: €{{ "{:,.0f}".format(game.prize) }}
+                        {% if game.attempts %}<br>Attempts: {{ game.attempts }}{% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        let isSimulating = false;
+
+        function getSelectedNumbers() {
+            const nums = [];
+            for (let i = 1; i <= 5; i++) {
+                nums.push(parseInt(document.querySelector(`input[name="num${i}"]`).value));
+            }
+            return nums;
+        }
+
+        function validateNumbers(nums) {
+            if (nums.length !== 5 || new Set(nums).size !== 5) {
+                showResult('Invalid input: Choose 5 unique numbers between 1 and 50.', 'error');
+                return false;
+            }
+            if (nums.some(n => n < 1 || n > 50)) {
+                showResult('Invalid input: All numbers must be between 1 and 50.', 'error');
+                return false;
+            }
+            return true;
+        }
+
+        function showResult(message, type, data = null) {
+            const container = document.getElementById('resultContainer');
+            
+            if (type === 'error') {
+                container.innerHTML = `<div class="result error"><p>${message}</p></div>`;
+                return;
+            }
+
+            if (type === 'winning') {
+                const prize = data.prize > 0 ? `🎉 You won €${data.prize.toLocaleString()}!` : 'No prize this time.';
+                const attemptsText = data.attempts ? `<div class="simulation-info">Won after ${data.attempts} attempt(s)!</div>` : '';
+                container.innerHTML = `
+                    <div class="result winning">
+                        <h2>🎊 Congratulations! 🎊</h2>
+                        <p>Your numbers: <div class="numbers-display">${data.user_numbers.map(n => `<div class="number">${n}</div>`).join('')}</div></p>
+                        <p>Draw numbers: <div class="numbers-display">${data.draw_numbers.map(n => `<div class="number">${n}</div>`).join('')}</div></p>
+                        <p><strong>Matches: ${data.matches}</strong></p>
+                        <div class="prize-text">${prize}</div>
+                        ${attemptsText}
+                    </div>
+                `;
+            } else if (type === 'losing') {
+                container.innerHTML = `
+                    <div class="result losing">
+                        <h2>😔 Simulation Complete</h2>
+                        <p>No winner after ${data.attempts} attempts.</p>
+                        <p>Your numbers: <div class="numbers-display">${data.user_numbers.map(n => `<div class="number">${n}</div>`).join('')}</div></p>
+                    </div>
+                `;
+            }
+        }
+
+        function startSimulation() {
+            const nums = getSelectedNumbers();
+            if (!validateNumbers(nums)) return;
+
+            isSimulating = true;
+            document.getElementById('simulateBtn').disabled = true;
+            document.getElementById('stopBtn').classList.add('show');
+            document.getElementById('resultContainer').innerHTML = '<div class="result"><p>Simulating... <span class="loading"></span></p></div>';
+
+            const maxAttempts = parseInt(document.getElementById('maxAttempts').value);
+
+            fetch('/simulate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_numbers: nums,
+                    max_attempts: maxAttempts
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!isSimulating) return;
+
+                if (data.status === 'won') {
+                    showResult('', 'winning', {
+                        user_numbers: data.data.user_numbers,
+                        draw_numbers: data.data.draw_numbers,
+                        matches: data.data.matches,
+                        prize: data.data.prize,
+                        attempts: data.data.attempts
+                    });
+                } else {
+                    showResult('', 'losing', {
+                        user_numbers: nums,
+                        attempts: maxAttempts
+                    });
+                }
+
+                resetSimulation();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showResult('An error occurred during simulation.', 'error');
+                resetSimulation();
+            });
+        }
+
+        function stopSimulation() {
+            isSimulating = false;
+            resetSimulation();
+            document.getElementById('resultContainer').innerHTML = '<div class="result error"><p>Simulation stopped by user.</p></div>';
+        }
+
+        function resetSimulation() {
+            document.getElementById('simulateBtn').disabled = false;
+            document.getElementById('stopBtn').classList.remove('show');
+        }
+
+        document.getElementById('playForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nums = getSelectedNumbers();
+            if (!validateNumbers(nums)) return;
+            this.submit();
+        });
+    </script>
+</body>
+</html>
