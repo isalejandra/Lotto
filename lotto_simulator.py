@@ -17,7 +17,8 @@ def main():
                 else:
                     print(f"All numbers must be between 1 and 50. Try again. '{n}' is not valid.")
         if counter_valid_numners != 5:
-            print("You must choose exactly 5 valid numbers. Try again.")        
+            print("You must choose exactly 5 valid numbers. Try again.")   
+                 
         else:
             valid_numbers = True
     
